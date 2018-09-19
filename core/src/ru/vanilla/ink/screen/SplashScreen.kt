@@ -1,33 +1,29 @@
 package ru.vanilla.ink.screen
 
-import android.R.attr.*
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import ru.vanilla.ink.core.MainGame
-import javax.microedition.khronos.opengles.GL10
 import com.badlogic.gdx.graphics.Color
 import ru.vanilla.ink.util.ResourceManager
 import com.badlogic.gdx.math.Interpolation
-import android.R.color
-
-
-
-
-
-
+import ru.vanilla.ink.core.Settings
+import ru.vanilla.ink.helper.input.InputHelper
+import java.util.*
 
 
 class SplashScreen(val game: MainGame) : Screen {
     private var timer = 0.0f
 
-    private val color = Color(0.0f, 0.0f, 0.0f, 0.0f)
+    private val color = Color(1.0f, 1.0f, 0.0f, 0.0f)
+    private val colorFade = Color(1.0f, 1.0f, 1.0f, 0.0f)
 
 
     lateinit var sb: SpriteBatch
 
     private var phase: SplashScreen.Phase = Phase.INIT
 
+    val rand = Random()
     override fun hide() {
     }
 
@@ -35,11 +31,10 @@ class SplashScreen(val game: MainGame) : Screen {
         sb = game.sb
     }
 
-    fun update(delta: Float){
+    private fun update(delta: Float){
         when (phase){
             SplashScreen.Phase.INIT -> {
                 timer -= Gdx.graphics.deltaTime
-                color.r = 1.0f
                 if (timer < 0.0F) {
                     phase = SplashScreen.Phase.FADE
                     timer = 1.2F
@@ -51,11 +46,13 @@ class SplashScreen(val game: MainGame) : Screen {
             SplashScreen.Phase.FADE -> {
                 timer -= Gdx.graphics.deltaTime
 
+                print("Pre $color;")
                 with(color){
-//                    r = Interpolation.fade.apply(cream.r, 1.0f, timer / 3.0f)
-//                    g = Interpolation.fade.apply(cream.g, 1.0f, timer / 3.0f)
-//                    b = Interpolation.fade.apply(cream.b, 1.0f, timer / 3.0f)
+                    r = Interpolation.fade.apply(colorFade.r, 1.0f, timer / 3)
+                    g = Interpolation.fade.apply(colorFade.g, 1.0f, timer / 3)
+                    b = Interpolation.fade.apply(colorFade.b, 1.0f, timer / 3)
                 }
+                println("Post $color")
 
 
 
@@ -75,6 +72,7 @@ class SplashScreen(val game: MainGame) : Screen {
                 }
             }
             SplashScreen.Phase.FADE_OUT -> {
+
                 color.a = Interpolation.fade.apply(0.0F, 1.0F, this.timer / 1.0F)
                 timer -= Gdx.graphics.deltaTime;
 
@@ -88,12 +86,28 @@ class SplashScreen(val game: MainGame) : Screen {
 
     override fun render(delta: Float) {
         update(delta)
-
+        updateInput()
         sb.begin()
-        sb.color = this.color
-        sb.draw(ResourceManager.res.getTexture("bg_white"), )
+        sb.color = color
+
+        sb.draw(ResourceManager.res.getTexture("bg_white"), 0f, 0f,
+                Settings.WIDTH.toFloat(), Settings.HEIGHT.toFloat())
 
         sb.end()
+    }
+
+    private fun updateInput() {
+        InputHelper.update()
+        if (InputHelper.justClickedLeft) {
+            with(color){
+                r = rand.nextFloat()
+                g = rand.nextFloat()
+                b = rand.nextFloat()
+                a = rand.nextFloat()
+            }
+        }
+
+        InputHelper.updateLast()
     }
 
     override fun pause() {
