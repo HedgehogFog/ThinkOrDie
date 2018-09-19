@@ -9,6 +9,7 @@ object ResourceManager {
     fun loadResouce() {
 
         with(res){
+            loadTexture("bg_white.png", "bg_white")
             loadTexture("images/bunny.png", "bunny")
             loadTexture("images/crystal.png", "crystal")
             loadTexture("images/hud.png", "hud")

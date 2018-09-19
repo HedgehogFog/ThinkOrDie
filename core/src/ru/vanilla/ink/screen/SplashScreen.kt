@@ -91,7 +91,7 @@ class SplashScreen(val game: MainGame) : Screen {
 
         sb.begin()
         sb.color = this.color
-        sb.draw(ResourceManager.res.getTexture("misc"), )
+        sb.draw(ResourceManager.res.getTexture("bg_white"), )
 
         sb.end()
     }
