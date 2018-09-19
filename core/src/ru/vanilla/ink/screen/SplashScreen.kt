@@ -5,18 +5,19 @@ import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import ru.vanilla.ink.core.MainGame
 import com.badlogic.gdx.graphics.Color
-import ru.vanilla.ink.util.ResourceManager
+import ru.vanilla.ink.assets.ContentManager
 import com.badlogic.gdx.math.Interpolation
-import ru.vanilla.ink.core.Settings
+import ru.vanilla.ink.data.ScreenInform
 import ru.vanilla.ink.helper.input.InputHelper
+import ru.vanilla.ink.screen.splash.SplashLogo
 import java.util.*
 
 
 class SplashScreen(val game: MainGame) : Screen {
     private var timer = 0.0f
 
-    private val color = Color(1.0f, 1.0f, 0.0f, 0.0f)
-    private val colorFade = Color(1.0f, 1.0f, 1.0f, 0.0f)
+    private var color = Color(.0f, .0f, .0f, 1.0f)
+    private val colorFade = Color(.2f, .2f, .2f, 1.0f)
 
 
     lateinit var sb: SpriteBatch
@@ -24,11 +25,22 @@ class SplashScreen(val game: MainGame) : Screen {
     private var phase: SplashScreen.Phase = Phase.INIT
 
     val rand = Random()
+
+    lateinit var splashLogo: SplashLogo
     override fun hide() {
     }
 
     override fun show() {
         sb = game.sb
+        splashLogo = SplashLogo(ContentManager.res.getTexture("badlogic")!!, 0f, (ScreenInform.HEIGHT / 2).toFloat())
+    }
+
+    fun inter(a : Color, b : Color, t : Float) : Color {
+        val rr = a.r + (b.r - a.r) * t
+        val gg = a.g + (b.g - a.g) * t
+        val bb = a.b + (b.b - a.b) * t
+        val aa = a.a + (b.a - a.a) * t
+        return Color(rr, gg, bb, aa)
     }
 
     private fun update(delta: Float){
@@ -46,14 +58,7 @@ class SplashScreen(val game: MainGame) : Screen {
             SplashScreen.Phase.FADE -> {
                 timer -= Gdx.graphics.deltaTime
 
-                print("Pre $color;")
-                with(color){
-                    r = Interpolation.fade.apply(colorFade.r, 1.0f, timer / 3)
-                    g = Interpolation.fade.apply(colorFade.g, 1.0f, timer / 3)
-                    b = Interpolation.fade.apply(colorFade.b, 1.0f, timer / 3)
-                }
-                println("Post $color")
-
+                color = inter(color, colorFade, delta * 2)
 
 
 //                this.sX = Interpolation.exp5Out.apply(Settings.WIDTH as Float / 2.0f + OFFSET_X, Settings.WIDTH as Float / 2.0f, this.timer / 3.0f)
@@ -90,9 +95,14 @@ class SplashScreen(val game: MainGame) : Screen {
         sb.begin()
         sb.color = color
 
-        sb.draw(ResourceManager.res.getTexture("bg_white"), 0f, 0f,
-                Settings.WIDTH.toFloat(), Settings.HEIGHT.toFloat())
-
+        sb.draw(ContentManager.res.getTexture("bg_white"), 0f, 0f,
+                ScreenInform.WIDTH.toFloat(), ScreenInform.HEIGHT.toFloat())
+        sb.color = Color(1.0f, 1.0f, 1.0f, 1.0f)
+        sb.draw(splashLogo.texture, splashLogo.x, splashLogo.y, 32f, 32f)
+        if (splashLogo.x < ScreenInform.WIDTH / 2 - 16) {
+            splashLogo.x++
+            splashLogo.y = Math.abs(Math.cos(splashLogo.x.toDouble() / 4).toFloat()) * 32 + (ScreenInform.HEIGHT / 2 - 16)
+        }
         sb.end()
     }
 
