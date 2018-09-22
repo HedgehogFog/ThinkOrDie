@@ -3,7 +3,7 @@ package ru.vanilla.ink.core
 import com.badlogic.gdx.Game
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import ru.vanilla.ink.screen.SplashScreen
-import ru.vanilla.ink.util.ResourceManager
+import ru.vanilla.ink.assets.ContentManager
 
 
 class MainGame : Game() {
@@ -14,7 +14,7 @@ class MainGame : Game() {
 
     override fun create() {
         sb = SpriteBatch()
-        ResourceManager.loadResouce()
+        ContentManager.loadResouce()
         setScreen(SplashScreen(this))
     }
 

@@ -5,20 +5,21 @@ import com.badlogic.gdx.Screen
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import ru.vanilla.ink.core.MainGame
 import com.badlogic.gdx.graphics.Color
-import ru.vanilla.ink.assets.ContentManager
-import com.badlogic.gdx.math.Interpolation
-import ru.vanilla.ink.data.ScreenInform
+import ru.vanilla.ink.core.Settings
 import ru.vanilla.ink.helper.input.InputHelper
-import ru.vanilla.ink.screen.splash.SplashLogo
+import ru.vanilla.ink.model.splash.SplashLogo
+import ru.vanilla.ink.assets.ContentManager
 import java.util.*
 
 
 class SplashScreen(val game: MainGame) : Screen {
     private var timer = 0.0f
 
-    private var color = Color(.0f, .0f, .0f, 1.0f)
+    private var backgroundColor = Color(.0f, .0f, .0f, 1.0f)
+    private var color = Color(.0f, .0f, .0f, 0.0f)
     private val colorFade = Color(.2f, .2f, .2f, 1.0f)
-
+    private val colorFadeOut = Color(.0f, .0f, .0f, 1.0f)
+    private val colorNormalized = Color(1.0f, 1.0f, 1.0f, 1.0f)
 
     lateinit var sb: SpriteBatch
 
@@ -32,90 +33,92 @@ class SplashScreen(val game: MainGame) : Screen {
 
     override fun show() {
         sb = game.sb
-        splashLogo = SplashLogo(ContentManager.res.getTexture("badlogic")!!, 0f, (ScreenInform.HEIGHT / 2).toFloat())
-    }
+        val splashLogoName = "badlogic"
+        splashLogo = SplashLogo(splashLogoName, ContentManager.res.getTexture(splashLogoName)!!,
+                (0f - 256f), (Settings.HEIGHT / 2).toFloat(), 256f, 256f)
+        splashLogo.setSpeed(4f, 64f)
 
-    fun inter(a : Color, b : Color, t : Float) : Color {
-        val rr = a.r + (b.r - a.r) * t
-        val gg = a.g + (b.g - a.g) * t
-        val bb = a.b + (b.b - a.b) * t
-        val aa = a.a + (b.a - a.a) * t
-        return Color(rr, gg, bb, aa)
     }
 
     private fun update(delta: Float){
+        println(phase)
         when (phase){
             SplashScreen.Phase.INIT -> {
                 timer -= Gdx.graphics.deltaTime
                 if (timer < 0.0F) {
+
                     phase = SplashScreen.Phase.FADE
                     timer = 1.2F
                 }
             }
-            SplashScreen.Phase.BOUNCE -> {
-
-            }
             SplashScreen.Phase.FADE -> {
                 timer -= Gdx.graphics.deltaTime
+                backgroundColor.lerp(colorFade, delta * 2)
 
-                color = inter(color, colorFade, delta * 2)
+                if (timer < 0.0f) {
+                    color = colorNormalized
 
-
-//                this.sX = Interpolation.exp5Out.apply(Settings.WIDTH as Float / 2.0f + OFFSET_X, Settings.WIDTH as Float / 2.0f, this.timer / 3.0f)
-//                this.sY = Interpolation.exp5Out.apply(Settings.HEIGHT as Float / 2.0f - OFFSET_Y, Settings.HEIGHT as Float / 2.0f, this.timer / 3.0f)
-
-                if (this.timer < 0.0f) {
-//                    this.phase = SplashScreen.Phase.WAIT
-//                    this.timer = 1.5f
+                    phase = SplashScreen.Phase.BOUNCE
+                    timer = 1.5f
                 }
             }
+            SplashScreen.Phase.BOUNCE -> {
+                if (splashLogo.x < Settings.WIDTH / 2 - splashLogo.width / 2) {
+                    splashLogo.update(delta)
+                } else {
+                    this.phase = SplashScreen.Phase.WAIT
+                    this.timer = 1.5f
+                }
+            }
+
             SplashScreen.Phase.WAIT -> {
-                timer -= Gdx.graphics.getDeltaTime();
+                timer -= Gdx.graphics.deltaTime
                 if (timer < 0.0F) {
-                    phase = SplashScreen.Phase.FADE_OUT;
+                    phase = SplashScreen.Phase.FADE_OUT
                     timer = 1.0F
                 }
             }
             SplashScreen.Phase.FADE_OUT -> {
 
-                color.a = Interpolation.fade.apply(0.0F, 1.0F, this.timer / 1.0F)
+                color.lerp(colorFadeOut, delta * 2)
+                backgroundColor.lerp(colorFadeOut, delta * 2)
                 timer -= Gdx.graphics.deltaTime;
 
-                if (this.timer < 0.0F) {
-//                    img.dispose();
-//                    isDone = true;
+                if (color == colorFadeOut) {
+                    dispose()
+                    game.screen = MainMenu(game)
                 }
             }
         }
     }
 
     override fun render(delta: Float) {
+
         update(delta)
         updateInput()
+
         sb.begin()
-        sb.color = color
+        sb.color = backgroundColor
 
         sb.draw(ContentManager.res.getTexture("bg_white"), 0f, 0f,
-                ScreenInform.WIDTH.toFloat(), ScreenInform.HEIGHT.toFloat())
-        sb.color = Color(1.0f, 1.0f, 1.0f, 1.0f)
-        sb.draw(splashLogo.texture, splashLogo.x, splashLogo.y, 32f, 32f)
-        if (splashLogo.x < ScreenInform.WIDTH / 2 - 16) {
-            splashLogo.x++
-            splashLogo.y = Math.abs(Math.cos(splashLogo.x.toDouble() / 4).toFloat()) * 32 + (ScreenInform.HEIGHT / 2 - 16)
-        }
+                Settings.WIDTH.toFloat(), Settings.HEIGHT.toFloat())
+
+        sb.color = color
+        sb.draw(splashLogo.texture, splashLogo.x, splashLogo.y, splashLogo.width, splashLogo.height)
+
         sb.end()
     }
 
     private fun updateInput() {
         InputHelper.update()
-        if (InputHelper.justClickedLeft) {
-            with(color){
-                r = rand.nextFloat()
-                g = rand.nextFloat()
-                b = rand.nextFloat()
-                a = rand.nextFloat()
-            }
-        }
+//        if (InputHelper.justClickedLeft) {
+//            with(backgroundColor){
+//                r = rand.nextFloat()
+//                g = rand.nextFloat()
+//                b = rand.nextFloat()
+//                a = rand.nextFloat()
+//            }
+//        }
 
         InputHelper.updateLast()
     }

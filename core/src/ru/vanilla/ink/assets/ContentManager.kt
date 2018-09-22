@@ -1,8 +1,7 @@
-package ru.vanilla.ink.util
+package ru.vanilla.ink.assets
 
-import ru.vanilla.ink.model.Content
+object ContentManager {
 
-object ResourceManager {
 
     val res = Content()
 
@@ -10,6 +9,7 @@ object ResourceManager {
 
         with(res){
             loadTexture("bg_white.png", "bg_white")
+            loadTexture("badlogic.jpg", "badlogic")
             loadTexture("images/bunny.png", "bunny")
             loadTexture("images/crystal.png", "crystal")
             loadTexture("images/hud.png", "hud")
