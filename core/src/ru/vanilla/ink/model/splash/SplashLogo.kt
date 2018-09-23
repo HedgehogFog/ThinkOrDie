@@ -1,14 +1,17 @@
 package ru.vanilla.ink.model.splash
 
+import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import ru.vanilla.ink.core.Settings
 import ru.vanilla.ink.model.GamePrefab
 
-class SplashLogo(val textureName: String, val texture: Texture, var x: Float, var y: Float, var width: Float, var height: Float) : GamePrefab(){
+class SplashLogo(val texture: Texture, var x: Float, var y: Float, var width: Float, var height: Float) : GamePrefab(){
 
     var speedX = 1.0f
     var speedY = 1.0f
+
+    var color = Color(.0f, .0f, .0f, 0.0f)
 
     override fun update(delta: Float) {
         x += speedX
@@ -16,7 +19,8 @@ class SplashLogo(val textureName: String, val texture: Texture, var x: Float, va
     }
 
     override fun render(sb: SpriteBatch) {
-        super.render(sb)
+        sb.color = color
+        sb.draw(texture, x, y, width, height)
     }
 
     fun setSpeed(speedX: Float, speedY: Float){

@@ -3,8 +3,8 @@ package ru.vanilla.ink.core
 object Settings {
     const val TITLE = "ThinkOrDie"
 
-    var WIDTH = 320
-    var HEIGHT = 240
+    var WIDTH = 1920
+    var HEIGHT = 1080
 
     const val SCALE = 2
 

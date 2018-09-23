@@ -16,7 +16,6 @@ class SplashScreen(val game: MainGame) : Screen {
     private var timer = 0.0f
 
     private var backgroundColor = Color(.0f, .0f, .0f, 1.0f)
-    private var color = Color(.0f, .0f, .0f, 0.0f)
     private val colorFade = Color(.2f, .2f, .2f, 1.0f)
     private val colorFadeOut = Color(.0f, .0f, .0f, 1.0f)
     private val colorNormalized = Color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -33,30 +32,28 @@ class SplashScreen(val game: MainGame) : Screen {
 
     override fun show() {
         sb = game.sb
-        val splashLogoName = "badlogic"
-        splashLogo = SplashLogo(splashLogoName, ContentManager.res.getTexture(splashLogoName)!!,
+        splashLogo = SplashLogo(ContentManager.res.getTexture("badlogic")!!,
                 (0f - 256f), (Settings.HEIGHT / 2).toFloat(), 256f, 256f)
         splashLogo.setSpeed(4f, 64f)
 
     }
 
     private fun update(delta: Float){
-        println(phase)
         when (phase){
             SplashScreen.Phase.INIT -> {
                 timer -= Gdx.graphics.deltaTime
                 if (timer < 0.0F) {
 
-                    phase = SplashScreen.Phase.FADE
+                    phase = SplashScreen.Phase.FADE_OUT
                     timer = 1.2F
                 }
             }
-            SplashScreen.Phase.FADE -> {
+            SplashScreen.Phase.FADE_OUT -> {
                 timer -= Gdx.graphics.deltaTime
                 backgroundColor.lerp(colorFade, delta * 2)
 
                 if (timer < 0.0f) {
-                    color = colorNormalized
+                    splashLogo.color = colorNormalized
 
                     phase = SplashScreen.Phase.BOUNCE
                     timer = 1.5f
@@ -74,17 +71,16 @@ class SplashScreen(val game: MainGame) : Screen {
             SplashScreen.Phase.WAIT -> {
                 timer -= Gdx.graphics.deltaTime
                 if (timer < 0.0F) {
-                    phase = SplashScreen.Phase.FADE_OUT
-                    timer = 1.0F
+                    phase = SplashScreen.Phase.FADE
                 }
             }
-            SplashScreen.Phase.FADE_OUT -> {
+            SplashScreen.Phase.FADE -> {
 
-                color.lerp(colorFadeOut, delta * 2)
+                splashLogo.color.lerp(colorFadeOut, delta * 2)
                 backgroundColor.lerp(colorFadeOut, delta * 2)
-                timer -= Gdx.graphics.deltaTime;
 
-                if (color == colorFadeOut) {
+
+                if (splashLogo.color == colorFadeOut) {
                     dispose()
                     game.screen = MainMenu(game)
                 }
@@ -102,9 +98,9 @@ class SplashScreen(val game: MainGame) : Screen {
 
         sb.draw(ContentManager.res.getTexture("bg_white"), 0f, 0f,
                 Settings.WIDTH.toFloat(), Settings.HEIGHT.toFloat())
+        splashLogo.render(sb)
 
-        sb.color = color
-        sb.draw(splashLogo.texture, splashLogo.x, splashLogo.y, splashLogo.width, splashLogo.height)
+
 
         sb.end()
     }

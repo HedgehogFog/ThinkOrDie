@@ -9,6 +9,10 @@ open class GamePrefab() {
 
     }
 
+    open fun inputUpdate(){
+
+    }
+
     open fun render(sb: SpriteBatch){
 
     }
